@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System;
 
 namespace HyprDash
 {
@@ -12,7 +12,11 @@ namespace HyprDash
             DateTime currentDateTime = DateTime.Now;
 
             // Weather
-
+                double temp;
+                int humidity;
+                string description;
+                double windSpeed;
+                Weather weather = new Weather();
             // Todo List
             
             //output

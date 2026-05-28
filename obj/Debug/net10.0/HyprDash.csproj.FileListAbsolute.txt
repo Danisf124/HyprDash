@@ -7,6 +7,7 @@
 /home/dania/HyprDash/obj/Debug/net10.0/HyprDash.AssemblyInfoInputs.cache
 /home/dania/HyprDash/obj/Debug/net10.0/HyprDash.AssemblyInfo.cs
 /home/dania/HyprDash/obj/Debug/net10.0/HyprDash.csproj.CoreCompileInputs.cache
+/home/dania/HyprDash/obj/Debug/net10.0/HyprDash.sourcelink.json
 /home/dania/HyprDash/obj/Debug/net10.0/HyprDash.dll
 /home/dania/HyprDash/obj/Debug/net10.0/refint/HyprDash.dll
 /home/dania/HyprDash/obj/Debug/net10.0/HyprDash.pdb
