@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace HyprDash
 {
@@ -6,26 +7,29 @@ namespace HyprDash
     {
         static async Task Main()
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
 
             //Time and data
 
             DateTime currentDateTime = DateTime.Now;
 
             // Weather for Day
-            Weather weather = new Weather();
-
-            await weather.GetWeatherFromApi();
+           
             //Weather for week
             
             // Todo List
 
             
+            
             //output
             Console.WriteLine(currentDateTime);
-            Console.WriteLine(weather.temp);
-            Console.WriteLine(weather.humidity);
-            Console.WriteLine(weather.windSpeed);
-            Console.WriteLine(weather.description);
+
+
+            // functions
+
+          
+        
         }
     }
 }
+
