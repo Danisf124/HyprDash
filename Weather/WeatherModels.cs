@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
+namespace HyprDash;
+
 public class WeatherResponse
 {   
     [JsonPropertyName("hourly")]
