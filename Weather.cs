@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 
+// Full link:https://api.openweathermap.org/data/4.0/onecall/current?lat=50.502027476871525&lon=30.787643652818044&appid=1a98b2ff7a2f07899629cc7b3933ac09
 
 namespace HyprDash
 {
@@ -12,14 +13,25 @@ namespace HyprDash
     internal class Weather
     {
         
+        // lat, len for Brovary
 
-        static public string city = "Bovary";
+        public const double LAT = 50.502027476871525;
 
-        static public string apiKey = "a63f47ea5062d199ecdd8330f3519c98";
+        public const double LON = 30.787643652818044;
 
-        static public string url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={apiKey}&units=metric&lang=ua"; 
+        public const string APIKEY = "1a98b2ff7a2f07899629cc7b3933ac09";
 
-        public async Task GetWeatherFromApi(double temp, int humidity,string description, double windSpeed)
+        static public string url = $"https://api.openweathermap.org/data/4.0/onecall/current?lat={LAT}&lon={LON}&units=metric&lang=ua&appid={APIKEY}";
+
+        public double temp;
+        public int humidity;
+        public string description;
+        public double windSpeed;
+
+        public Weather()
+        {}
+
+        public async Task GetWeatherFromApi()
         {
             try
             {
@@ -45,4 +57,5 @@ namespace HyprDash
         }
 
     }
+
 }
