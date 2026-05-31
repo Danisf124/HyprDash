@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
 
+
 namespace HyprDash
 {
     internal class Program
