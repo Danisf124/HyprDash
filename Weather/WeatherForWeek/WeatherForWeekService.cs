@@ -6,15 +6,22 @@ namespace HyprDash
 {
     public class WeatherForWeekService
     {
-        static public double lat = 50.50215484873138;
+        private readonly HttpClient _client;
 
-        static public double lon = 30.787733726908275;
+        static private double _lat = 50.50215484873138;
 
-        public readonly string url =$"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant&timezone=Europe%2FKyiv";
+        static private double _lon = 30.787733726908275;
+
+        private readonly string url =$"https://api.open-meteo.com/v1/forecast?latitude={_lat}&longitude={_lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant&timezone=Europe%2FKyiv";
+
+        public WeatherForWeekService(HttpClient client)
+        {
+            _client = client;
+        }
 
         public async Task<WeatherForWeekResponse> GetWeatherForWeek()
         {
-            var client = new HttpClient();
+            var client = _client;
 
             try
             {

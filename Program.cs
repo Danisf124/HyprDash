@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
 
+
 namespace HyprDash
 {
     internal class Program
@@ -13,32 +14,29 @@ namespace HyprDash
         static async Task Main()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-
-            //Time and data
-
+            var cache = new CachedWeatherService();
+            var culture = new CultureInfo("uk-UA");
             DateTime currentDateTime = DateTime.Now;
+            bool quit = false;
+           
+            while(true)
+            {
+                Console.Clear();
 
-            // Weather for Day
+                //Get Weather from API(OpenMeteo) in 15 min.
+                await cache.RefreshIfNeed();
 
-            var weatherForDayService = new WeatherForDayService();
+                //Time
+                Console.WriteLine(currentDateTime.ToString("dd MMMM yyyy, HH:mm", culture));
 
-            var weatherForDayResponse = await weatherForDayService.GetWeatherForDay();
+                // Show weather         
+                ShowWeatherForDay(cache.Day);
+                ShowWeatherForWeek(cache.Week);
 
-            //Weather for week
-            var weatherForWeekService = new WeatherForWeekService();
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
 
-            var weatherForWeekResponse = await weatherForWeekService.GetWeatherForWeek();
-            
-            // Todo List
-
-        
-            //output
-            Console.WriteLine(currentDateTime);
-
-            ShowWeatherForDay(weatherForDayResponse);
-
-            ShowWeatherForWeek(weatherForWeekResponse);
-
+          
             // functions
 
             static void ShowWeatherForWeek(WeatherForWeekResponse weatherForWeekResponse)
