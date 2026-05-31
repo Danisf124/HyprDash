@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HyprDash")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0eac9e7e5b67ff80ef709a7fa8e3c6536ffc47c7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9963b430cd3cea77a7800d466cb05e3142584fed")]
 [assembly: System.Reflection.AssemblyProductAttribute("HyprDash")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HyprDash")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
