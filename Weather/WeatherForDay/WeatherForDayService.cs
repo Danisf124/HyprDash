@@ -24,9 +24,6 @@ namespace HyprDash
 
             try
             {
-                //var response = await client.GetAsync(url);
-                //response.EnsureSuccessStatusCode();
-
                 var json = await client.GetStringAsync(url);
 
                 var data = JsonSerializer.Deserialize<WeatherForDayResponse>(json);

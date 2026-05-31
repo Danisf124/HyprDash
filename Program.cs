@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-
-//https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=30.79&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,rain,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=Europe%2FMoscow&forecast_days=1
+using System.Data.Common;
+using System.Globalization;
+using System.Net.Http.Headers;
 
 namespace HyprDash
 {
@@ -24,6 +25,9 @@ namespace HyprDash
             var weatherForDayResponse = await weatherForDayService.GetWeatherForDay();
 
             //Weather for week
+            var weatherForWeekService = new WeatherForWeekService();
+
+            var weatherForWeekResponse = await weatherForWeekService.GetWeatherForWeek();
             
             // Todo List
 
@@ -33,22 +37,45 @@ namespace HyprDash
 
             ShowWeatherForDay(weatherForDayResponse);
 
+            ShowWeatherForWeek(weatherForWeekResponse);
+
             // functions
+
+            static void ShowWeatherForWeek(WeatherForWeekResponse weatherForWeekResponse)
+            {
+                Console.WriteLine("Weather for Week: ");
+                var culture = new CultureInfo("uk-UA");
+                for(int i = 0; i < 7; i++)
+                {
+                    Console.WriteLine($"Day : {weatherForWeekResponse.WeatherForWeekDaily.Time[i].ToString("dd MMMM",culture)}");
+                    Console.WriteLine($"Max temperature : {weatherForWeekResponse.WeatherForWeekDaily.TempMax[i]}°C");
+                    Console.WriteLine($"Min temperature : {weatherForWeekResponse.WeatherForWeekDaily.TempMin[i]}°C");
+                    Console.WriteLine($"Sun rice : {weatherForWeekResponse.WeatherForWeekDaily.SunRice[i].ToString("HH:mm")}");
+                    Console.WriteLine($"Sunset : {weatherForWeekResponse.WeatherForWeekDaily.SunSet[i].ToString("HH:mm")}");
+                    Console.WriteLine($"Precipitation probability : {weatherForWeekResponse.WeatherForWeekDaily.PrecipitationProbability[i]}%");
+                    Console.WriteLine($"Wind speed : {weatherForWeekResponse.WeatherForWeekDaily.WindSpeed[i]}km/h");
+                    Console.WriteLine($"Wind direction : {GetWindDirection(weatherForWeekResponse.WeatherForWeekDaily.WindDirection[i])}");
+                    Console.WriteLine($"Description : {GetWeatherDescription(weatherForWeekResponse.WeatherForWeekDaily.WeatherCode[i])}");
+                    Console.WriteLine();
+
+                }
+            }
 
             static void ShowWeatherForDay(WeatherForDayResponse weatherForDayResponse)
             {
+                Console.WriteLine("Weather for day: ");
+                
                 for(int i = 0; i < 24; i++)
                 {
-                    Console.WriteLine("Weather for day: ");
-                    Console.WriteLine($"Time : {weatherForDayResponse.weatherData.Time[i]}");
-                    Console.WriteLine($"Temp : {weatherForDayResponse.weatherData.Temp[i]}");
-                    Console.WriteLine($"Humidity : {weatherForDayResponse.weatherData.Humidity[i]}");
-                    Console.WriteLine($"Apparent temperature : {weatherForDayResponse.weatherData.ApparentTemperature[i]}");
-                    Console.WriteLine($"Precipitation probability : {weatherForDayResponse.weatherData.PrecipitationProbability[i]}");
-                    Console.WriteLine($"Rain : {weatherForDayResponse.weatherData.Rain[i]}");
-                    Console.WriteLine($"Snowfall : {weatherForDayResponse.weatherData.Snowfall[i]}");
+                    Console.WriteLine($"Time : {weatherForDayResponse.weatherData.Time[i].ToString("HH:mm")}");
+                    Console.WriteLine($"Temp : {weatherForDayResponse.weatherData.Temp[i]}°C");
+                    Console.WriteLine($"Humidity : {weatherForDayResponse.weatherData.Humidity[i]}%");
+                    Console.WriteLine($"Apparent temperature : {weatherForDayResponse.weatherData.ApparentTemperature[i]}°C");
+                    Console.WriteLine($"Precipitation probability : {weatherForDayResponse.weatherData.PrecipitationProbability[i]}%");
+                    Console.WriteLine($"Rain : {weatherForDayResponse.weatherData.Rain[i]}mm");
+                    Console.WriteLine($"Snowfall : {weatherForDayResponse.weatherData.Snowfall[i]}cm");
                     Console.WriteLine($"Description : {GetWeatherDescription(weatherForDayResponse.weatherData.WeatherCode[i])}");
-                    Console.WriteLine($"Wind speed : {weatherForDayResponse.weatherData.WindSpeed[i]}");
+                    Console.WriteLine($"Wind speed : {weatherForDayResponse.weatherData.WindSpeed[i]}km/h");
                     Console.WriteLine($"Wind direction : {GetWindDirection(weatherForDayResponse.weatherData.WindDirection[i])}");
                     Console.WriteLine();
                 }
