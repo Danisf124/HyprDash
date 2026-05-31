@@ -21,25 +21,17 @@ namespace HyprDash
 
             // Weather for Day
 
-            var weatherForDayService = new WeatherForDayService();
-
-            var weatherForDayResponse = await weatherForDayService.GetWeatherForDay();
 
             //Weather for week
-            var weatherForWeekService = new WeatherForWeekService();
-
-            var weatherForWeekResponse = await weatherForWeekService.GetWeatherForWeek();
+          
             
             // Todo List
-
+            
         
             //output
             Console.WriteLine(currentDateTime);
 
-            ShowWeatherForDay(weatherForDayResponse);
-
-            ShowWeatherForWeek(weatherForWeekResponse);
-
+          
             // functions
 
             static void ShowWeatherForWeek(WeatherForWeekResponse weatherForWeekResponse)

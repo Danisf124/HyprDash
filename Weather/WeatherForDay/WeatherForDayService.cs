@@ -11,16 +11,23 @@ namespace HyprDash
 {
     public class WeatherForDayService
     {
-        static public double lat = 50.50215484873138;
+        private readonly HttpClient _client;
 
-        static public double lon = 30.787733726908275;
+        static private readonly double _lat = 50.50215484873138;
 
-        public readonly string url = $"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,rain,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=Europe%2FKyiv&forecast_days=1";
+        static private readonly double _lon = 30.787733726908275;
 
+        private readonly string url = $"https://api.open-meteo.com/v1/forecast?latitude={_lat}&longitude={_lon}&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,rain,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=Europe%2FKyiv&forecast_days=1";
+
+        public WeatherForDayService(HttpClient client)
+        {
+            _client = client;
+        }
 
         public async Task<WeatherForDayResponse> GetWeatherForDay()
         {
-            var client = new HttpClient();
+            
+            var client = _client;
 
             try
             {
