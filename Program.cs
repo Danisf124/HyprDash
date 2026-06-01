@@ -18,8 +18,6 @@ namespace HyprDash
             var culture = new CultureInfo("uk-UA");
             DateTime currentDateTime = DateTime.Now;
             var todoList = new TodoDb();
-
-            //todoList.AddTodo("First todo");
            
             while(true)
             {
@@ -36,19 +34,7 @@ namespace HyprDash
                 //ShowWeatherForWeek(cache.Week);
 
                 //Todo list
-
-
-                todoList.GetAllTodos();
-
-                todoList.CompleteTodo(2);
-
-                todoList.GetAllTodos();
-
-                todoList.DeleteTodo(2);
-
-                todoList.GetAllTodos();
-
-                
+                // Testing correct
 
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
