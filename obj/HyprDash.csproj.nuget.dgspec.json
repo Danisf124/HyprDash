@@ -49,6 +49,10 @@
               "target": "Package",
               "version": "[10.0.8, )"
             },
+            "Spectre.Console": {
+              "target": "Package",
+              "version": "[0.55.2, )"
+            },
             "sqlite-net-pcl": {
               "target": "Package",
               "version": "[1.9.172, )"
