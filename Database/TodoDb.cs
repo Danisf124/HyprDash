@@ -7,7 +7,7 @@ namespace HyprDash
     {
         private readonly SqliteConnection _connection;
 
-        public TodoDb(string datasource = "tododb")
+        public TodoDb(string datasource = "Data Source=todo.db")
         {
             _connection = new SqliteConnection(datasource);
             _connection.Open();
@@ -19,7 +19,7 @@ namespace HyprDash
             var cmd = _connection.CreateCommand();
             cmd.CommandText = """
                 CREATE TABLE IF NOT EXISTS todolist(
-                    Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Id          INTEGER PRIMARY KEY,
                     Title       TEXT    NOT NULL DEFAULT '',
                     IsCompleted INTEGER NOT NULL DEFAULT 0,
                     CreatedAt   TEXT    NOT NULL DEFAULT (datetime('now'))

@@ -17,7 +17,9 @@ namespace HyprDash
             var cache = new CachedWeatherService();
             var culture = new CultureInfo("uk-UA");
             DateTime currentDateTime = DateTime.Now;
-            bool quit = false;
+            var todoList = new TodoDb();
+
+            //todoList.AddTodo("First todo");
            
             while(true)
             {
@@ -30,8 +32,23 @@ namespace HyprDash
                 Console.WriteLine(currentDateTime.ToString("dd MMMM yyyy, HH:mm", culture));
 
                 // Show weather         
-                ShowWeatherForDay(cache.Day);
-                ShowWeatherForWeek(cache.Week);
+                //ShowWeatherForDay(cache.Day);
+                //ShowWeatherForWeek(cache.Week);
+
+                //Todo list
+
+
+                todoList.GetAllTodos();
+
+                todoList.CompleteTodo(2);
+
+                todoList.GetAllTodos();
+
+                todoList.DeleteTodo(2);
+
+                todoList.GetAllTodos();
+
+                
 
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
