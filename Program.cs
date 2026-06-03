@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
+using Spectre.Console;
 
 
 namespace HyprDash
@@ -14,71 +15,77 @@ namespace HyprDash
         static async Task Main()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            var cache = new CachedWeatherService();
-            var culture = new CultureInfo("uk-UA");
+            var cache = new CachedWeatherService(); // Weather service
+            var culture = new CultureInfo("uk-UA"); // for Ukraine region
             DateTime currentDateTime = DateTime.Now;
             var todoList = new TodoDb();
-           
-            while(true)
-            {
-                Console.Clear();
 
-                //Get Weather from API(OpenMeteo) in 15 min.
-                await cache.RefreshIfNeed();
+            // Welcome panel and date&time panel
+            var welcomePanel = new Panel(
+                    new Rows(
+                        new Markup($"Привіт [blue]Danisf[/] :3"),
+                        new Markup($"Зараз: {currentDateTime.ToString("d MMMM yyyy, dddd, HH:mm", culture)}")))
+                        .Border(BoxBorder.Rounded);
 
-                //Time
-                Console.WriteLine(currentDateTime.ToString("dd MMMM yyyy, HH:mm", culture));
+            // Weather Tables
+            // Table for day
+            var weatherForDayTable = new Table()
+                .RoundedBorder()
+                .BorderColor(Color.White)
+                .Title("Погода на сьогодні");
 
-                // Show weather         
-                //ShowWeatherForDay(cache.Day);
-                //ShowWeatherForWeek(cache.Week);
+            weatherForDayTable.AddColumn("Час");
+            weatherForDayTable.AddColumn("Темп");
+            weatherForDayTable.AddColumn("Відчув.");
+            weatherForDayTable.AddColumn("Вологість");
+            weatherForDayTable.AddColumn("Опади");
+            weatherForDayTable.AddColumn("Дощ");
+            weatherForDayTable.AddColumn("Сніг");
+            weatherForDayTable.AddColumn("Опис");
+            weatherForDayTable.AddColumn("Вітер");
+            weatherForDayTable.AddColumn("Напрямок");
 
-                //Todo list
-                // Testing correct
+            await cache.RefreshIfNeed();
 
-                await Task.Delay(TimeSpan.FromSeconds(1));
-            }
+            ShowWeatherForDay(cache.Day, weatherForDayTable);
+
+
+
+            AnsiConsole.Write(welcomePanel);
+            AnsiConsole.Write(weatherForDayTable);
+
+
+            
 
           
             // functions
 
             static void ShowWeatherForWeek(WeatherForWeekResponse weatherForWeekResponse)
             {
-                Console.WriteLine("Weather for Week: ");
-                var culture = new CultureInfo("uk-UA");
-                for(int i = 0; i < 7; i++)
-                {
-                    Console.WriteLine($"Day : {weatherForWeekResponse.WeatherForWeekDaily.Time[i].ToString("dd MMMM",culture)}");
-                    Console.WriteLine($"Max temperature : {weatherForWeekResponse.WeatherForWeekDaily.TempMax[i]}°C");
-                    Console.WriteLine($"Min temperature : {weatherForWeekResponse.WeatherForWeekDaily.TempMin[i]}°C");
-                    Console.WriteLine($"Sun rice : {weatherForWeekResponse.WeatherForWeekDaily.SunRice[i].ToString("HH:mm")}");
-                    Console.WriteLine($"Sunset : {weatherForWeekResponse.WeatherForWeekDaily.SunSet[i].ToString("HH:mm")}");
-                    Console.WriteLine($"Precipitation probability : {weatherForWeekResponse.WeatherForWeekDaily.PrecipitationProbability[i]}%");
-                    Console.WriteLine($"Wind speed : {weatherForWeekResponse.WeatherForWeekDaily.WindSpeed[i]}km/h");
-                    Console.WriteLine($"Wind direction : {GetWindDirection(weatherForWeekResponse.WeatherForWeekDaily.WindDirection[i])}");
-                    Console.WriteLine($"Description : {GetWeatherDescription(weatherForWeekResponse.WeatherForWeekDaily.WeatherCode[i])}");
-                    Console.WriteLine();
-
-                }
+                
             }
 
-            static void ShowWeatherForDay(WeatherForDayResponse weatherForDayResponse)
+            static void ShowWeatherForDay(WeatherForDayResponse weatherForDayResponse, Table renderTable)
             {
-                Console.WriteLine("Weather for day: ");
-                
+                var w = weatherForDayResponse.weatherData;
+                // Later change on new Markup($"[red]{Markup.Escape(w.Rain[i].ToString())}mm[/]")
+
                 for(int i = 0; i < 24; i++)
                 {
-                    Console.WriteLine($"Time : {weatherForDayResponse.weatherData.Time[i].ToString("HH:mm")}");
-                    Console.WriteLine($"Temp : {weatherForDayResponse.weatherData.Temp[i]}°C");
-                    Console.WriteLine($"Humidity : {weatherForDayResponse.weatherData.Humidity[i]}%");
-                    Console.WriteLine($"Apparent temperature : {weatherForDayResponse.weatherData.ApparentTemperature[i]}°C");
-                    Console.WriteLine($"Precipitation probability : {weatherForDayResponse.weatherData.PrecipitationProbability[i]}%");
-                    Console.WriteLine($"Rain : {weatherForDayResponse.weatherData.Rain[i]}mm");
-                    Console.WriteLine($"Snowfall : {weatherForDayResponse.weatherData.Snowfall[i]}cm");
-                    Console.WriteLine($"Description : {GetWeatherDescription(weatherForDayResponse.weatherData.WeatherCode[i])}");
-                    Console.WriteLine($"Wind speed : {weatherForDayResponse.weatherData.WindSpeed[i]}km/h");
-                    Console.WriteLine($"Wind direction : {GetWindDirection(weatherForDayResponse.weatherData.WindDirection[i])}");
-                    Console.WriteLine();
+                    renderTable.AddRow(
+                        new Text(w.Time[i].ToString("HH:mm")),
+                        new Text($"{w.Temp[i]}°C"),
+                        new Text($"{w.ApparentTemperature[i]}°C"),
+                        new Text($"{w.Humidity[i]}%"),
+                        new Text($"{w.PrecipitationProbability[i]}%"),
+                        new Text($"{w.Rain[i]}mm"),
+                        new Text($"{w.Snowfall[i]}cm"),
+                        new Text($"{GetWeatherDescription(w.WeatherCode[i])}"),
+                        new Text($"{w.WindSpeed[i]}km/h"),
+                        new Text($"{GetWindDirection(w.WindDirection[i])}")
+
+                    );
+
                 }
             }
 
