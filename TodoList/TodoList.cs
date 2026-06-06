@@ -1,0 +1,48 @@
+using System;
+using System.ComponentModel;
+using System.Net.NetworkInformation;
+
+namespace HyprDash
+{
+    public class TodoList
+    {
+        private readonly TodoDb _todoDb;
+
+        public int Id;
+
+        public string Title;
+
+        public bool IsCompleted;
+
+        public DateTime CreatedAt;
+
+        public List<TodoList> TodoLists {get; set;}
+
+        public TodoList(string title)
+        {
+           Title = title;
+           IsCompleted = false;
+           CreatedAt = DateTime.Now;
+        }
+
+        public TodoList()
+        {
+            Title = String.Empty;
+            IsCompleted = false;
+            CreatedAt = DateTime.MinValue;
+        }
+
+        public void CreateNewTodo(string title)
+        {
+            TodoList newTodo = new TodoList(title);
+
+            _todoDb.AddTodo(newTodo);
+        }
+
+        public void GetAllTodosFromDB()
+        {
+            TodoLists = _todoDb.GetAllTodos();
+        }
+
+    }
+}

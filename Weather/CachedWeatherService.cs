@@ -18,8 +18,8 @@ namespace HyprDash
 
         public async Task RefreshIfNeed()
         {
-            if(!IsStale && _cachedDay != null) return;
-
+            if(!IsStale && _cachedDay != null && _cachedWeek != null) return;
+            
             Console.WriteLine("Оновлення даних погоди...");
 
             var dayService = new WeatherForDayService(_httpClient);
