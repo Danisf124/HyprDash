@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace HyprDash
 {
@@ -107,6 +108,72 @@ namespace HyprDash
             _connection.Close();
     
             return todos;
+        }
+
+        public void CompleteTodo(int id)
+        {
+            _connection.Open();
+
+            string updateQuery =@"
+            UPDATE TodoLists
+            SET IsCompleted = 1
+            WHERE Id = @Id;";
+
+            using(var command = _connection.CreateCommand())
+            {
+                command.CommandText = updateQuery;
+
+                command.Parameters.AddWithValue("@Id",id);
+
+                command.ExecuteNonQuery();
+
+            }
+
+            _connection.Close();
+        }
+
+        public void DeleteTodo(int id)
+        {
+            _connection.Open();
+
+            string deleteQuery =@"
+            DELETE FROM TodoLists
+            WHERE Id = @Id;";
+
+            using(var command = _connection.CreateCommand())
+            {
+                command.CommandText = deleteQuery;
+
+                command.Parameters.AddWithValue("@Id",id);
+
+                command.ExecuteNonQuery();
+
+            }
+
+            _connection.Close();
+        }
+
+        public void ClearAllTodo()
+        {
+            _connection.Open();
+
+            string clearQuery = "DELETE FROM TodoLists;";
+
+            using(var command = _connection.CreateCommand())
+            {
+                command.CommandText = clearQuery;
+                command.ExecuteNonQuery();
+            }   
+
+            string resetIdQuery = "DELETE FROM sqlite_sequence WHERE name='TodoLists';";
+            
+            using (var resetCommand = _connection.CreateCommand())
+            {
+                resetCommand.CommandText = resetIdQuery;
+                resetCommand.ExecuteNonQuery();
+            }
+
+            _connection.Close();
         }
 
     }

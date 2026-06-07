@@ -44,5 +44,20 @@ namespace HyprDash
             TodoLists = _todoDb.GetAllTodos();
         }
 
+        public void CompleteTodo(int id)
+        {
+            _todoDb.CompleteTodo(id);
+        }
+
+        public void DeleteTodo(int id)
+        {
+            _todoDb.DeleteTodo(id);
+        }
+
+        public void ClearAllTodo()
+        {
+            _todoDb.ClearAllTodo();
+        }
+
     }
 }

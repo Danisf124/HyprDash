@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Spectre.Console;
 using Spectre.Console.Rendering;
+using SQLitePCL;
 
 
 namespace HyprDash
@@ -70,6 +71,8 @@ namespace HyprDash
                         await cache.RefreshIfNeed();
                         currentDateTime = DateTime.Now;
                         todoList.GetAllTodosFromDB();
+                        List<int> existingIds = todoList.TodoLists.Select(t => t.Id).ToList();
+                        
 
                         layout["Header"].Update(BuildWelcomePanel(currentDateTime, culture));
 
@@ -124,7 +127,28 @@ namespace HyprDash
                                 var title = await GetTitle(layout, ctx);
 
                                 todoList.CreateNewTodo(title);
+                            }
+                            else if(currentScreen == ScreenType.TodoList && key == ConsoleKey.C)
+                            {
+                                layout["TopFooter"].Update(new Text("")).Size(1);
+                                layout["BottomFooter"].Update(new Text("")).Size(1);
 
+                                int id = await GetId(layout, ctx, existingIds);
+
+                                todoList.CompleteTodo(id);
+                            }
+                            else if(currentScreen == ScreenType.TodoList && key == ConsoleKey.D)
+                            {
+                                layout["TopFooter"].Update(new Text("")).Size(1);
+                                layout["BottomFooter"].Update(new Text("")).Size(1);
+
+                                int id = await GetId(layout, ctx, existingIds);
+
+                                todoList.DeleteTodo(id);
+                            }
+                            else if(currentScreen == ScreenType.TodoList && key == ConsoleKey.F)
+                            {
+                                todoList.ClearAllTodo();
                             }
                             
                         }
@@ -327,6 +351,87 @@ namespace HyprDash
                 }
 
                 return todoTable;
+            }
+
+            static async Task<int> GetId(Layout layout, LiveDisplayContext ctx, List<int> validIds)
+            {
+               bool isTyping = true;
+                string userInput = String.Empty;
+                string errorMessage = String.Empty; // Стан для виводу повідомлень про помилку
+
+                while(isTyping)
+                {
+                    // Формуємо текст панелі. Якщо є помилка — додаємо її червоним кольором
+                    var panelText = $"[yellow]Введіть id:[/] {Markup.Escape(userInput)}[blink]_[/]";
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        panelText += $"\n[red]{errorMessage}[/]";
+                    }
+
+                    var inputPanel = new Panel(panelText);
+                    layout["Content"].Update(inputPanel).Size(15);
+                    ctx.Refresh();
+
+                    while(Console.KeyAvailable)
+                    {
+                        var keyInfo = Console.ReadKey(intercept: true);
+
+                        // Якщо користувач почав щось виправляти, прибираємо помилку
+                        if (errorMessage != String.Empty) 
+                        {
+                            errorMessage = String.Empty;
+                        }
+
+                        if (keyInfo.Key == ConsoleKey.Enter)
+                        {
+                            // Перевіряємо, чи це коректне число і чи введено хоч щось
+                            if (int.TryParse(userInput, out int parsedId))
+                            {
+                                // Перевіряємо, чи є такий ID у нашому списку з бази
+                                if (validIds.Contains(parsedId))
+                                {
+                                    isTyping = false; // Усе добре, виходимо
+                                    break;
+                                }
+                                else
+                                {
+                                    errorMessage = $"Завдання з ID {parsedId} не існує!";
+                                    userInput = String.Empty; // Скидаємо ввід, щоб користувач спробував знову
+                                }
+                            }
+                            else
+                            {
+                                errorMessage = "Ввід не може бути порожнім!";
+                                userInput = String.Empty;
+                            }
+                        }
+                        else if (keyInfo.Key == ConsoleKey.Backspace)
+                        {
+                            if (userInput.Length > 0)
+                            {
+                                userInput = userInput.Substring(0, userInput.Length - 1);
+                            }
+                        }
+                        // ЗАМІНА: Замість !char.IsControl використовуємо char.IsDigit
+                        else if (char.IsDigit(keyInfo.KeyChar)) 
+                        {
+                            // Захист від переповнення типу int (максимум 9 символів)
+                            if (userInput.Length < 9) 
+                            {
+                                userInput += keyInfo.KeyChar;
+                            }
+                        }
+                    }
+                    
+                    await Task.Delay(30);
+                }
+
+                var finalPanel = new Panel($"[yellow]Введіть id:[/] [green]{Markup.Escape(userInput)}[/]");
+                layout["Content"].Update(finalPanel);
+                ctx.Refresh();
+
+                // Тут Parse вже безпечний, бо ми перевірили його через TryParse під час вводу
+                return int.Parse(userInput);
             }
 
         }
