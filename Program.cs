@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
@@ -20,6 +22,7 @@ namespace HyprDash
             TodoList
         }
 
+        
 
         static async Task Main()
         {
@@ -28,11 +31,12 @@ namespace HyprDash
 
             var cache = new CachedWeatherService(); // Weather service
             var culture = new CultureInfo("uk-UA"); // for Ukraine region
-            var todoList = new TodoDb();
+            var todoList = new TodoList();
+           
 
             DateTime currentDateTime = DateTime.Now;
             await cache.RefreshIfNeed();
-
+            
             // Welcome panel and date&time panel
             var welcomePanel = new Panel(
                     new Rows(
@@ -47,7 +51,7 @@ namespace HyprDash
                 new Layout("Footer").Size(6)
                 .SplitRows(
                     new Layout("TopFooter").Size(1),
-                    new Layout("BottomFooter").Size(1)
+                    new Layout("BottomFooter").Size(2)
                 )
             );
 
@@ -56,8 +60,8 @@ namespace HyprDash
                 .Overflow(VerticalOverflow.Ellipsis)
                 .StartAsync(async ctx =>
                 {
-                    ScreenType currentScreen = ScreenType.WeatherForDay;
                     bool isRunning = true;
+                    ScreenType currentScreen = ScreenType.WeatherForDay;
 
                    
                     while(isRunning)
@@ -65,15 +69,20 @@ namespace HyprDash
                         //Updating data
                         await cache.RefreshIfNeed();
                         currentDateTime = DateTime.Now;
+                        todoList.GetAllTodosFromDB();
 
                         layout["Header"].Update(BuildWelcomePanel(currentDateTime, culture));
 
                         layout["TopFooter"].Update(new Panel(new Markup("[grey]Використовуйте [yellow]стрілки ← →[/] для перемикання екранів | [red]ESC[/] для виходу[/]")).Border(BoxBorder.None));
+                        
                         layout["BottomFooter"].Update(new Text("")); // Empty
+
+                        // Chancing screens
 
                         if(currentScreen == ScreenType.WeatherForDay)
                         {
                             layout["Content"].Update(InitWeatherForDay(cache.Day)).Size(29);
+                            
                         }    
                         else if(currentScreen == ScreenType.WeatherForWeek)
                         {
@@ -81,10 +90,11 @@ namespace HyprDash
                         }
                         else if(currentScreen == ScreenType.TodoList)
                         {
-                            layout["BottomFooter"].Update(new Panel(new Markup("[yellow]A - To add new todo;")));
+                            layout["Content"].Update(InitTodoTable(todoList));
+                            layout["BottomFooter"].Update(new Panel(new Markup("[yellow]A[/] - To add new todo;")).Border(BoxBorder.None));
                         }
 
-                        ctx.Refresh();
+                        //ctx.Refresh();
 
                         if(Console.KeyAvailable)
                         {
@@ -104,15 +114,29 @@ namespace HyprDash
                                 // Exit
                                 isRunning = false;
                             }
+                            else if(currentScreen == ScreenType.TodoList && key == ConsoleKey.A)
+                            {  
+                                // Clearing layout
+                                layout["Content"].Update(new Text("")).Size(1);
+                                layout["TopFooter"].Update(new Text("")).Size(1);
+                                layout["BottomFooter"].Update(new Text("")).Size(1);
+
+                                var title = await GetTitle(layout, ctx);
+
+                                todoList.CreateNewTodo(title);
+
+                            }
                             
                         }
 
+                        ctx.Refresh();
 
                         await Task.Delay(100);
                     }
                 });
-          
+        
             // functions
+
 
             static Table InitWeatherForWeek(WeatherForWeekResponse weatherForWeekResponse)
             {
@@ -231,6 +255,78 @@ namespace HyprDash
                         new Markup($"Привіт [blue]Danisf[/] :3"),
                         new Markup($"Зараз: {dt.ToString("d MMMM yyyy, dddd, HH:mm", culture)}")))
                     .Border(BoxBorder.Rounded);
+            }
+
+            static async Task<string> GetTitle(Layout layout, LiveDisplayContext ctx)
+            {
+                bool isTyping = true;
+
+                string userInput = String.Empty;
+
+                while(isTyping)
+                {
+                    var inputPanel = new Panel($"[yellow]Введіть назву:[/] {Markup.Escape(userInput)}[blink]_[/]");
+                    layout["Content"].Update(inputPanel).Size(15);
+                    ctx.Refresh();
+                    while(Console.KeyAvailable)
+                    {
+                        var keyInfo = Console.ReadKey(intercept: true);
+
+                        if (keyInfo.Key == ConsoleKey.Enter)
+                        {
+                            isTyping = false; // Виходимо з головного циклу
+                            break;
+                        }
+                        else if (keyInfo.Key == ConsoleKey.Backspace)
+                        {
+                            if (userInput.Length > 0)
+                            {
+                                userInput = userInput.Substring(0, userInput.Length - 1);
+                            }
+                        }
+                        // Додаємо символ, якщо він не є системним (наприклад, стрілки чи F1)
+                        else if (!char.IsControl(keyInfo.KeyChar))
+                        {
+                            userInput += keyInfo.KeyChar;
+                        }
+
+                        await Task.Delay(30);
+                    }
+                    
+                }
+
+                var finalPanel = new Panel($"[yellow]Введіть назву:[/] [green]{Markup.Escape(userInput)}[/]");
+                layout["Content"].Update(finalPanel);
+                ctx.Refresh();
+
+                return userInput;
+            }   
+       
+            static Table InitTodoTable(TodoList todoList)
+            {
+                var list = todoList.TodoLists;
+
+                var todoTable = new Table()
+                .RoundedBorder()
+                .BorderColor(Color.White)
+                .Title("Todo List");
+
+                todoTable.AddColumn("Номер");
+                todoTable.AddColumn("Назва");
+                todoTable.AddColumn("Статус");
+                todoTable.AddColumn("Дата");
+
+                for(int i = 0; i < todoList.TodoLists.Count; i++)
+                {
+                    todoTable.AddRow(
+                        new Text($"{list[i].Id}"),
+                        new Text($"{list[i].Title}"),
+                        new Text($"{(list[i].IsCompleted ? "Виконано" : "Не виконано")}"),
+                        new Text($"{list[i].CreatedAt.ToString("dd/MM/yy, HH:mm")}")
+                    );
+                }
+
+                return todoTable;
             }
 
         }

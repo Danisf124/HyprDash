@@ -6,7 +6,7 @@ namespace HyprDash
 {
     public class TodoList
     {
-        private readonly TodoDb _todoDb;
+        private readonly TodoDb _todoDb = new TodoDb();
 
         public int Id;
 

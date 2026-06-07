@@ -8,18 +8,18 @@ namespace HyprDash
     public class TodoDb
     {
         private readonly SqliteConnection _connection;
+        string dbPath = Path.Combine(AppContext.BaseDirectory, "todo.db");
 
-        public TodoDb(string datasource = "Data Source=todo.db")
+        public TodoDb()
         {
-            _connection = new SqliteConnection(datasource);
-            _connection.Open();
+            _connection = new SqliteConnection($"Data Source={dbPath}");       
             InitDb();
-            _connection.Close();
         }
 
         private void InitDb()
         {
-                        
+            _connection.Open(); 
+
             string createTableQuery = @"
                 CREATE TABLE IF NOT EXISTS TodoLists (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,12 +33,9 @@ namespace HyprDash
                 command.CommandText = createTableQuery;
                 command.ExecuteNonQuery();
             }
-            
-        }
 
-        public void Dispose()
-        {
-            _connection?.Dispose();
+            _connection.Close();
+            
         }
 
         public void AddTodo(TodoList todo)
