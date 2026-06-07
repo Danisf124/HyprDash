@@ -21,11 +21,10 @@ namespace HyprDash
 
         public async Task<WeatherForWeekResponse> GetWeatherForWeek()
         {
-            var client = _client;
 
             try
             {
-                var json = await client.GetStringAsync(url);
+                var json = await _client.GetStringAsync(url);
 
                 var data = JsonSerializer.Deserialize<WeatherForWeekResponse>(json);
                 return data ?? throw new InvalidOperationException("Порожня відповідь");
