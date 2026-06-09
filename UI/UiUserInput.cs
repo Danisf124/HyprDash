@@ -33,7 +33,11 @@ namespace HyprDash
                             userInput = userInput.Substring(0, userInput.Length - 1);
                         }
                     }
-                    // Додаємо символ, якщо він не є системним (наприклад, стрілки чи F1)
+                    else if(keyInfo.Key == ConsoleKey.Escape)
+                    {
+                        isTyping = false;
+                    }
+    
                     else if (!char.IsControl(keyInfo.KeyChar))
                     {
                         userInput += keyInfo.KeyChar;
@@ -111,6 +115,11 @@ namespace HyprDash
                             userInput = userInput.Substring(0, userInput.Length - 1);
                         }
                     }
+                    else if(keyInfo.Key == ConsoleKey.Escape)
+                    {
+                        isTyping = false;
+                        return 0;
+                    }
                     // ЗАМІНА: Замість !char.IsControl використовуємо char.IsDigit
                     else if (char.IsDigit(keyInfo.KeyChar)) 
                     {
@@ -185,6 +194,11 @@ namespace HyprDash
                             userInput = userInput.Substring(0, userInput.Length - 1);
                         }
                     }
+                    else if(keyInfo.Key == ConsoleKey.Escape)
+                    {
+                        isTyping = false;
+                        
+                    }
 
                     if (!char.IsControl(keyInfo.KeyChar))
                     {
@@ -195,7 +209,7 @@ namespace HyprDash
 
                 await Task.Delay(30);
             }
-            var finalPanel = new Panel($"[yellow]Введіть id:[/] [green]{Markup.Escape(userInput)}[/]");
+            var finalPanel = new Panel($"[red]Ви дійсно хочете видалити всі завдання?[/]y/n:");
             layout["Content"].Update(finalPanel);
             ctx.Refresh();
 

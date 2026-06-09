@@ -33,7 +33,6 @@ namespace HyprDash
             todoList.GetAllTodosFromDB();
             List<int> existingIds = todoList.TodoLists.Select(t => t.Id).ToList();
            
-
             DateTime currentDateTime = DateTime.Now;
             await cache.RefreshIfNeed();
             
@@ -89,7 +88,7 @@ namespace HyprDash
                         }
                         else if(currentScreen == ScreenType.TodoList)
                         {
-                            layout["Content"].Update(UiBuilder.BuildTodoTable(todoList));
+                            layout["Content"].Update(UiBuilder.BuildTodoTable(todoList, culture));
                             layout["BottomFooter"].Update(new Panel(new Markup("[yellow]A[/] - Щоб додати нове завдання, C - виконати, D - Видалити, F - очистити;")).Border(BoxBorder.None));
                         }
 
@@ -120,9 +119,16 @@ namespace HyprDash
                                 layout["TopFooter"].Update(new Text("")).Size(1);
                                 layout["BottomFooter"].Update(new Text("")).Size(1);
 
-                                var title = await GetTitle(layout, ctx);
+                                var title = await UiUserInput.GetTitle(layout, ctx);
 
-                                todoList.CreateNewTodo(title);
+                                if(title == "")
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    todoList.CreateNewTodo(title);
+                                }
 
                                 // Updating data
                                 todoList.GetAllTodosFromDB(); 
@@ -146,9 +152,16 @@ namespace HyprDash
                                 layout["TopFooter"].Update(new Text("")).Size(1);
                                 layout["BottomFooter"].Update(new Text("")).Size(1);
 
-                                int id = await GetId(layout, ctx, existingIds);
+                                int id = await UiUserInput.GetId(layout, ctx, existingIds);
 
-                                todoList.DeleteTodo(id);
+                                if(id == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    todoList.DeleteTodo(id);
+                                }
 
                                 // Updating data
                                 todoList.GetAllTodosFromDB(); 
@@ -180,138 +193,8 @@ namespace HyprDash
                     }
                 });
         
-            // functions
-
-            static async Task<string> GetTitle(Layout layout, LiveDisplayContext ctx)
-            {
-                bool isTyping = true;
-
-                string userInput = String.Empty;
-
-                var inputPanel = new Panel($"[yellow]Введіть назву:[/] {Markup.Escape(userInput)}[blink]_[/]");
-
-                while(isTyping)
-                {
-                    inputPanel = new Panel($"[yellow]Введіть назву:[/] {Markup.Escape(userInput)}[blink]_[/]");
-                    layout["Content"].Update(inputPanel).Size(15);
-                    ctx.Refresh();
-                    while(Console.KeyAvailable)
-                    {
-                        var keyInfo = Console.ReadKey(intercept: true);
-
-                        if (keyInfo.Key == ConsoleKey.Enter)
-                        {
-                            isTyping = false; // Виходимо з головного циклу
-                            break;
-                        }
-                        else if (keyInfo.Key == ConsoleKey.Backspace)
-                        {
-                            if (userInput.Length > 0)
-                            {
-                                userInput = userInput.Substring(0, userInput.Length - 1);
-                            }
-                        }
-                        // Додаємо символ, якщо він не є системним (наприклад, стрілки чи F1)
-                        else if (!char.IsControl(keyInfo.KeyChar))
-                        {
-                            userInput += keyInfo.KeyChar;
-                        }
-
-                        await Task.Delay(30);
-                    }
-                    
-                }
-
-                var finalPanel = new Panel($"[yellow]Введіть назву:[/] [green]{Markup.Escape(userInput)}[/]");
-                layout["Content"].Update(finalPanel);
-                ctx.Refresh();
-
-                return userInput;
-            }   
-
-            static async Task<int> GetId(Layout layout, LiveDisplayContext ctx, List<int> validIds)
-            {
-                bool isTyping = true;
-                string userInput = String.Empty;
-                string errorMessage = String.Empty; // Стан для виводу повідомлень про помилку
-                var panelText = $"[yellow]Введіть id:[/] {Markup.Escape(userInput)}[blink]_[/]";
-
-                while(isTyping)
-                {
-                    // Формуємо текст панелі. Якщо є помилка — додаємо її червоним кольором
-                    panelText = $"[yellow]Введіть id:[/] {Markup.Escape(userInput)}[blink]_[/]";
-                    if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        panelText += $"\n[red]{errorMessage}[/]";
-                    }
-
-                    var inputPanel = new Panel(panelText);
-                    layout["Content"].Update(inputPanel).Size(15);
-                    ctx.Refresh();
-
-                    while(Console.KeyAvailable)
-                    {
-                        var keyInfo = Console.ReadKey(intercept: true);
-
-                        // Якщо користувач почав щось виправляти, прибираємо помилку
-                        if (errorMessage != String.Empty) 
-                        {
-                            errorMessage = String.Empty;
-                        }
-
-                        if (keyInfo.Key == ConsoleKey.Enter)
-                        {
-                            // Перевіряємо, чи це коректне число і чи введено хоч щось
-                            if (int.TryParse(userInput, out int parsedId))
-                            {
-                                // Перевіряємо, чи є такий ID у нашому списку з бази
-                                if (validIds.Contains(parsedId))
-                                {
-                                    isTyping = false; // Усе добре, виходимо
-                                    break;
-                                }
-                                else
-                                {
-                                    errorMessage = $"Завдання з ID {parsedId} не існує!";
-                                    userInput = String.Empty; // Скидаємо ввід, щоб користувач спробував знову
-                                }
-                            }
-                            else
-                            {
-                                errorMessage = "Ввід не може бути порожнім!";
-                                userInput = String.Empty;
-                            }
-                        }
-                        else if (keyInfo.Key == ConsoleKey.Backspace)
-                        {
-                            if (userInput.Length > 0)
-                            {
-                                userInput = userInput.Substring(0, userInput.Length - 1);
-                            }
-                        }
-                        // ЗАМІНА: Замість !char.IsControl використовуємо char.IsDigit
-                        else if (char.IsDigit(keyInfo.KeyChar)) 
-                        {
-                            // Захист від переповнення типу int (максимум 9 символів)
-                            if (userInput.Length < 9) 
-                            {
-                                userInput += keyInfo.KeyChar;
-                            }
-                        }
-                    }
-                    
-                    await Task.Delay(30);
-                }
-
-                var finalPanel = new Panel($"[yellow]Введіть id:[/] [green]{Markup.Escape(userInput)}[/]");
-                layout["Content"].Update(finalPanel);
-                ctx.Refresh();
-
-                // Тут Parse вже безпечний, бо ми перевірили його через TryParse під час вводу
-                return int.Parse(userInput);
-            }
-
         }
+
     }
 }
 

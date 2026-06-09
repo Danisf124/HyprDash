@@ -28,6 +28,23 @@ namespace HyprDash
             //7 days
             for(int i = 0; i < 7; i++)
             {
+                if(DateTime.Now.ToString("dddd") == w.Time[i].ToString("dddd"))
+                {
+                    weatherForWeekTable.AddRow(
+                        new Markup($"[green]{w.Time[i].ToString("dddd, d MMMM", culture)}[/]"),
+                        new Markup($"[green]{w.TempMax[i]}°C[/]"),
+                        new Markup($"[green]{w.TempMin[i]}°C[/]"),
+                        new Markup($"[green]{w.PrecipitationProbability[i]}%[/]"),
+                        new Markup($"[green]{w.SunRice[i].ToString("HH:mm")}[/]"),
+                        new Markup($"[green]{w.SunSet[i].ToString("HH:mm")}[/]"),
+                        new Markup($"[green]{GetWeatherDescription(w.WeatherCode[i])}[/]"),
+                        new Markup($"[green]{w.WindSpeed[i]}km/h[/]"),
+                        new Markup($"[green]{GetWindDirection(w.WindDirection[i])}[/]")
+                    );
+
+                    continue;
+                }
+
                 weatherForWeekTable.AddRow(
                     new Text(w.Time[i].ToString("dddd, d MMMM", culture)),
                     new Text($"{w.TempMax[i]}°C"),
@@ -68,6 +85,24 @@ namespace HyprDash
             //24 hours
             for(int i = 0; i < 24; i++)
             {
+                if(DateTime.Now.ToString("HH") == w.Time[i].ToString("HH"))
+                {
+                    weatherForDayTable.AddRow(
+                        new Markup($"[green]{w.Time[i].ToString("HH:mm")}[/]"),
+                        new Markup($"[green]{w.Temp[i]}°C[/]"),
+                        new Markup($"[green]{w.ApparentTemperature[i]}°C[/]"),
+                        new Markup($"[green]{w.Humidity[i]}%[/]"),
+                        new Markup($"[green]{w.PrecipitationProbability[i]}%[/]"),
+                        new Markup($"[green]{w.Rain[i]}mm[/]"),
+                        new Markup($"[green]{w.Snowfall[i]}cm[/]"),
+                        new Markup($"[green]{GetWeatherDescription(w.WeatherCode[i])}[/]"),
+                        new Markup($"[green]{w.WindSpeed[i]}km/h[/]"),
+                        new Markup($"[green]{GetWindDirection(w.WindDirection[i])}[/]")
+                    );
+
+                    continue; //Skip iteration
+                }
+
                 weatherForDayTable.AddRow(
                     new Text(w.Time[i].ToString("HH:mm")),
                     new Text($"{w.Temp[i]}°C"),
@@ -87,7 +122,7 @@ namespace HyprDash
             return weatherForDayTable;
         }
 
-        static public Table BuildTodoTable(TodoList todoList)
+        static public Table BuildTodoTable(TodoList todoList, CultureInfo culture)
         {
             var list = todoList.TodoLists;
 
@@ -106,8 +141,8 @@ namespace HyprDash
                 todoTable.AddRow(
                     new Text($"{list[i].Id}"),
                     new Text($"{list[i].Title}"),
-                    new Text($"{(list[i].IsCompleted ? "Виконано" : "Не виконано")}"),
-                    new Text($"{list[i].CreatedAt.ToString("dd/MM/yy, HH:mm")}")
+                    new Markup($"{(list[i].IsCompleted ? "[green]Виконано[/]" : "[yellow]Не виконано[/]")}"),
+                    new Text($"{list[i].CreatedAt.ToString("d MMMM yyyy, HH:mm", culture)}")
                 );
             }
 
